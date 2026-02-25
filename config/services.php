@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        // Support either GOOGLE_REDIRECT or GOOGLE_REDIRECT_URI in .env
+        'redirect' => env('GOOGLE_REDIRECT', env('GOOGLE_REDIRECT_URI')),
+    ],
+
 ];

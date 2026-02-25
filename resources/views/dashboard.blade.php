@@ -15,6 +15,13 @@
               </ul>
             </nav>
           </div>
+          @auth
+          <div class="mb-4">
+            <a href="{{ route('generate.sertifikat') }}" class="btn btn-danger">
+              <i class="mdi mdi-file-pdf"></i> Cetak Sertifikat PDF
+            </a>
+          </div>
+          @endauth
           <div class="row">
             <div class="col-md-4 stretch-card grid-margin">
               <div class="card bg-gradient-danger card-img-holder text-white">

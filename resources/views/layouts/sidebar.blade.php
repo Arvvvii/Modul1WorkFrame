@@ -38,6 +38,32 @@
         <i class="mdi mdi-book-open-page-variant menu-icon"></i>
       </a>
     </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="{{ route('barang.index') }}">
+        <span class="menu-title">Tag Harga UMKM</span>
+        <i class="mdi mdi-tag menu-icon"></i>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="collapse" href="#pdf-dropdown" aria-expanded="false" aria-controls="pdf-dropdown">
+        <span class="menu-title">Generate PDF</span>
+        <i class="menu-arrow"></i>
+        <i class="mdi mdi-file-document menu-icon"></i>
+      </a>
+      <div class="collapse" id="pdf-dropdown">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> 
+            <a class="nav-link" href="{{ route('generate.sertifikat') }}" target="_blank" rel="noopener">Sertifikat</a> 
+          </li>
+          <li class="nav-item"> 
+            <a class="nav-link" href="{{ route('generate.undangan') }}" target="_blank" rel="noopener">Undangan</a> 
+          </li>
+        </ul>
+      </div>
+    </li>
+
     <li class="nav-item nav-logout">
       <a class="nav-link" href="#" onclick="event.preventDefault(); document.getElementById('logout-form-main').submit();">
         <span class="menu-title">Logout</span>
