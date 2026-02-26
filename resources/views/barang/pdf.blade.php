@@ -22,6 +22,7 @@
         }
 
         .label-content { padding: 2mm; }
+        .label-id { font-size: 7pt; color: #4a4a4a; margin-bottom: 1px; }
         .label-name { font-weight: 700; font-size: 9pt; line-height: 1; }
         .label-price { font-size: 8.5pt; margin-top: 2px; }
         .page-break { page-break-after: always; }
@@ -39,6 +40,7 @@
                             <td class="label-cell">
                                 @if($item)
                                     <div class="label-content">
+                                        <div class="label-id">{{ $item->id_barang }}</div>
                                         <div class="label-name">{{ $item->nama }}</div>
                                         <div class="label-price">Rp {{ number_format($item->harga,0,',','.') }}</div>
                                     </div>

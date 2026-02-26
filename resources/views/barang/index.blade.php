@@ -19,6 +19,7 @@
                         <input type="number" name="start_y" class="form-control" min="1" max="8" value="1" required>
                     </div>
                     <div class="col-md-6 d-flex align-items-end">
+                        <a href="{{ route('barang.create') }}" class="btn btn-success mr-2" id="add-button">Tambah Barang</a>
                         <button type="submit" class="btn btn-primary" id="print-button">Cetak Label</button>
                     </div>
                 </div>
@@ -31,6 +32,7 @@
                                 <th>ID</th>
                                 <th>Nama</th>
                                 <th>Harga</th>
+                                <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -40,6 +42,10 @@
                                 <td>{{ $barang->id_barang }}</td>
                                 <td>{{ $barang->nama }}</td>
                                 <td>{{ number_format($barang->harga, 0, ',', '.') }}</td>
+                                <td>
+                                    <a href="{{ route('barang.edit', $barang->id_barang) }}" class="btn btn-sm btn-warning">Edit</a>
+                                    <button type="button" class="btn btn-sm btn-danger delete-button" data-url="{{ route('barang.destroy', $barang->id_barang) }}" data-name="{{ $barang->nama }}">Hapus</button>
+                                </td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -63,5 +69,38 @@
     if (window.jQuery && $.fn.dataTable) {
         $('#barangs-table').DataTable();
     }
+
+    // Delete button handler: create and submit a DELETE form dynamically
+    (function(){
+        const csrf = '{{ csrf_token() }}';
+        document.addEventListener('click', function(e){
+            const btn = e.target.closest('.delete-button');
+            if (!btn) return;
+            const url = btn.getAttribute('data-url');
+            const name = btn.getAttribute('data-name') || 'item';
+            if (!url) return;
+            if (!confirm('Hapus "' + name + '"? Data yang dihapus tidak dapat dikembalikan.')) return;
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = url;
+            form.style.display = 'none';
+
+            const tokenInput = document.createElement('input');
+            tokenInput.type = 'hidden';
+            tokenInput.name = '_token';
+            tokenInput.value = csrf;
+            form.appendChild(tokenInput);
+
+            const methodInput = document.createElement('input');
+            methodInput.type = 'hidden';
+            methodInput.name = '_method';
+            methodInput.value = 'DELETE';
+            form.appendChild(methodInput);
+
+            document.body.appendChild(form);
+            form.submit();
+        });
+    })();
 </script>
 @endsection
