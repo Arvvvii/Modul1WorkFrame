@@ -11,6 +11,7 @@ class Barang extends Model
     protected $primaryKey = 'id_barang';
     protected $keyType = 'string';
     public $incrementing = false;
+    public $timestamps = false;
 
     protected $fillable = [
         'nama',
