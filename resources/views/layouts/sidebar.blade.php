@@ -41,11 +41,28 @@
 
     <li class="nav-item">
       <a class="nav-link" href="{{ route('barang.index') }}">
-        <span class="menu-title">Barang</span>
+        <span class="menu-title">Barang (CRUD)</span>
         <i class="mdi mdi-tag menu-icon"></i>
       </a>
     </li>
 
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="collapse" href="#tugas-modul-dropdown" aria-expanded="false" aria-controls="tugas-modul-dropdown">
+        <span class="menu-title">Tugas Modul 4</span>
+        <i class="menu-arrow"></i>
+        <i class="mdi mdi-jsfiddle menu-icon"></i>
+      </a>
+      <div class="collapse" id="tugas-modul-dropdown">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> 
+            <a class="nav-link" href="/barang-dom">Manipulasi Tabel</a> 
+          </li>
+          <li class="nav-item"> 
+            <a class="nav-link" href="/select-kota">Select Kota</a> 
+          </li>
+        </ul>
+      </div>
+    </li>
     <li class="nav-item">
       <a class="nav-link" data-bs-toggle="collapse" href="#pdf-dropdown" aria-expanded="false" aria-controls="pdf-dropdown">
         <span class="menu-title">Generate PDF</span>
