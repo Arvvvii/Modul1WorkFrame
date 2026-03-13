@@ -1,11 +1,14 @@
-@include('layouts.header')
-@include('layouts.style-global')
-@stack('style-page')
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  
+  @include('layouts.header')
+  @include('layouts.style-global')
+  @stack('style-page')
 </head>
 <body>
   <div class="container-scroller">
-    {{-- optional proBanner could be added by pages if needed --}}
-
     @include('layouts.navbar')
 
     <div class="container-fluid page-body-wrapper">
@@ -17,11 +20,8 @@
         </div>
         @include('layouts.footer')
       </div>
-      <!-- main-panel ends -->
     </div>
-    <!-- page-body-wrapper ends -->
   </div>
-  <!-- container-scroller -->
 
   @include('layouts.js-global')
   @stack('js-page')

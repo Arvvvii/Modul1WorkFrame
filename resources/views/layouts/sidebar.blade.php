@@ -18,32 +18,46 @@
       </a>
     </li>
 
-    <li class="nav-item">
+    <li class="nav-item {{ Request::is('/') ? 'active' : '' }}">
       <a class="nav-link" href="{{ url('/') }}">
         <span class="menu-title">Dashboard</span>
         <i class="mdi mdi-home menu-icon"></i>
       </a>
     </li>
 
-    <li class="nav-item">
+    <li class="nav-item {{ Request::is('kategori*') ? 'active' : '' }}">
       <a class="nav-link" href="{{ route('kategori.index') }}">
         <span class="menu-title">Kategori</span>
         <i class="mdi mdi-format-list-bulleted menu-icon"></i>
       </a>
     </li>
 
-    <li class="nav-item">
+    <li class="nav-item {{ Request::is('buku*') ? 'active' : '' }}">
       <a class="nav-link" href="{{ route('buku.index') }}">
         <span class="menu-title">Buku</span>
         <i class="mdi mdi-book-open-page-variant menu-icon"></i>
       </a>
     </li>
 
-    <li class="nav-item">
+    <li class="nav-item {{ Request::is('barang') ? 'active' : '' }}">
       <a class="nav-link" href="{{ route('barang.index') }}">
         <span class="menu-title">Barang (CRUD)</span>
         <i class="mdi mdi-tag menu-icon"></i>
       </a>
+    </li>
+
+    <li class="nav-item {{ Request::is('kasir*') ? 'active' : '' }}">
+      <a class="nav-link" href="{{ route('kasir.index') }}">
+        <span class="menu-title">Kasir (POS)</span>
+        <i class="mdi mdi-cash-register menu-icon"></i>
+      </a>
+    </li>
+
+    <li class="nav-item {{ Request::is('wilayah*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('wilayah.index') }}">
+          <span class="menu-title">Wilayah Administrasi</span>
+          <i class="mdi mdi-map-marker menu-icon"></i>
+        </a>
     </li>
 
     <li class="nav-item">
@@ -52,17 +66,18 @@
         <i class="menu-arrow"></i>
         <i class="mdi mdi-jsfiddle menu-icon"></i>
       </a>
-      <div class="collapse" id="tugas-modul-dropdown">
+      <div class="collapse {{ Request::is('barang-dom') || Request::is('select-kota') ? 'show' : '' }}" id="tugas-modul-dropdown">
         <ul class="nav flex-column sub-menu">
           <li class="nav-item"> 
-            <a class="nav-link" href="/barang-dom">Manipulasi Tabel</a> 
+            <a class="nav-link {{ Request::is('barang-dom') ? 'active' : '' }}" href="/barang-dom">Manipulasi Tabel</a> 
           </li>
           <li class="nav-item"> 
-            <a class="nav-link" href="/select-kota">Select Kota</a> 
+            <a class="nav-link {{ Request::is('select-kota') ? 'active' : '' }}" href="/select-kota">Select Kota</a> 
           </li>
         </ul>
       </div>
     </li>
+
     <li class="nav-item">
       <a class="nav-link" data-bs-toggle="collapse" href="#pdf-dropdown" aria-expanded="false" aria-controls="pdf-dropdown">
         <span class="menu-title">Generate PDF</span>
