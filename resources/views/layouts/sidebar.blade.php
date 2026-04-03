@@ -25,6 +25,47 @@
       </a>
     </li>
 
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="collapse" href="#menu-master-dropdown" aria-expanded="false" aria-controls="menu-master-dropdown">
+        <span class="menu-title">Menu Master</span>
+        <i class="menu-arrow"></i>
+        <i class="mdi mdi-cart menu-icon"></i>
+      </a>
+      <div class="collapse {{ Request::is('pesan-kantin*') || Request::is('pembayaran*') ? 'show' : '' }}" id="menu-master-dropdown">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> 
+            <a class="nav-link {{ Request::is('pesan-kantin*') ? 'active' : '' }}" href="{{ route('kantin.index') }}">Pemesanan</a> 
+          </li>
+          <li class="nav-item"> 
+            <a class="nav-link {{ Request::is('pembayaran-customer*') ? 'active' : '' }}" href="{{ route('kantin.pembayaran') }}">Pembayaran</a> 
+          </li>
+        </ul>
+      </div>
+    </li>
+
+    @auth
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="collapse" href="#vendor-dropdown" aria-expanded="false" aria-controls="vendor-dropdown">
+        <span class="menu-title">Vendor</span>
+        <i class="menu-arrow"></i>
+        <i class="mdi mdi-store menu-icon"></i>
+      </a>
+      <div class="collapse {{ Request::is('menu*') || Request::is('vendor*') || Request::is('transaksi*') ? 'show' : '' }}" id="vendor-dropdown">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> 
+            <a class="nav-link {{ Request::is('menu*') ? 'active' : '' }}" href="{{ route('menu.index') }}">Master Menu</a> 
+          </li>
+          <li class="nav-item"> 
+            <a class="nav-link {{ Request::is('vendor*') ? 'active' : '' }}" href="{{ route('vendor.index') }}">Master Vendor</a> 
+          </li>
+          <li class="nav-item"> 
+            <a class="nav-link {{ Request::is('transaksi*') ? 'active' : '' }}" href="{{ route('vendor.transaksi') }}">Data Transaksi</a> 
+          </li>
+        </ul>
+      </div>
+    </li>
+    @endauth
+
     <li class="nav-item {{ Request::is('kategori*') ? 'active' : '' }}">
       <a class="nav-link" href="{{ route('kategori.index') }}">
         <span class="menu-title">Kategori</span>
