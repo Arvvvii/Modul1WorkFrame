@@ -82,14 +82,18 @@ class KantinController extends Controller
             if ($request->transaction_status == 'capture' || $request->transaction_status == 'settlement') {
                 // Ambil ID Pesanan dari string 'KANTIN-ID-TIME'
                 $parts = explode('-', $request->order_id);
-                $id_asli = $parts[1]; // Mengambil angka ID di antara KANTIN dan TIME
+                $id_asli = $parts[1]; 
                 
                 $pesanan = Pesanan::find($id_asli);
                 if ($pesanan) {
-                    $pesanan->update(['status_bayar' => 1]);
+                    $pesanan->update([
+                        'status_bayar' => 1,
+                        'metode_bayar' => $request->payment_type // MENANGKAP METODE BAYAR
+                    ]);
                 }
             }
         }
+        return response()->json(['status' => 'success']);
     }
 
     public function pembayaranCustomer()
