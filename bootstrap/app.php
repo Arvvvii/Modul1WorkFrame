@@ -14,7 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // MENGIZINKAN MIDTRANS & CHECKOUT TANPA TOKEN CSRF
         $middleware->validateCsrfTokens(except: [
             'midtrans-callback',
-            'checkout'
+            'checkout',
+            '/'
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

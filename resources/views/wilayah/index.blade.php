@@ -85,6 +85,10 @@ $(document).ready(function() {
                     Swal.close();
                     $('#kabupaten').prop('disabled', false);
                     res.forEach(item => { $('#kabupaten').append(`<option value="${item.id}">${item.name}</option>`) });
+                },
+                error: function() {
+                    Swal.close();
+                    Swal.fire('Gagal', 'Tidak dapat memuat kabupaten. Periksa koneksi atau coba lagi.', 'error');
                 }
             });
         }
@@ -96,11 +100,16 @@ $(document).ready(function() {
         $('#kecamatan, #desa').html('<option value="">Pilih...</option>').prop('disabled', true);
         if(id) {
             loading();
-            axios.get("{{ url('wilayah/districts') }}/" + id).then(res => {
-                Swal.close();
-                $('#kecamatan').prop('disabled', false);
-                res.data.forEach(item => { $('#kecamatan').append(`<option value="${item.id}">${item.name}</option>`) });
-            });
+            axios.get("{{ url('wilayah/districts') }}/" + id)
+                .then(res => {
+                    Swal.close();
+                    $('#kecamatan').prop('disabled', false);
+                    res.data.forEach(item => { $('#kecamatan').append(`<option value="${item.id}">${item.name}</option>`) });
+                })
+                .catch(() => {
+                    Swal.close();
+                    Swal.fire('Gagal', 'Tidak dapat memuat kecamatan. Periksa koneksi atau coba lagi.', 'error');
+                });
         }
     });
 
@@ -110,11 +119,16 @@ $(document).ready(function() {
         $('#desa').html('<option value="">Pilih...</option>').prop('disabled', true);
         if(id) {
             loading();
-            axios.get("{{ url('wilayah/villages') }}/" + id).then(res => {
-                Swal.close();
-                $('#desa').prop('disabled', false);
-                res.data.forEach(item => { $('#desa').append(`<option value="${item.id}">${item.name}</option>`) });
-            });
+            axios.get("{{ url('wilayah/villages') }}/" + id)
+                .then(res => {
+                    Swal.close();
+                    $('#desa').prop('disabled', false);
+                    res.data.forEach(item => { $('#desa').append(`<option value="${item.id}">${item.name}</option>`) });
+                })
+                .catch(() => {
+                    Swal.close();
+                    Swal.fire('Gagal', 'Tidak dapat memuat desa. Periksa koneksi atau coba lagi.', 'error');
+                });
         }
     });
 });

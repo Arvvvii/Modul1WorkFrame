@@ -10,6 +10,7 @@ use App\Http\Controllers\BarangController;
 use App\Http\Controllers\PdfController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KantinController;
+use App\Http\Controllers\CustomerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -66,6 +67,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/kasir/cari/{kode}', [BarangController::class, 'cariBarang'])->name('kasir.cari');
     Route::post('/kasir/simpan', [BarangController::class, 'simpanTransaksi'])->name('kasir.simpan');
 
+    // Customer Modul 7
+    Route::get('/customers', [CustomerController::class, 'index'])->name('customer.index');
+    Route::get('/customers/create', [CustomerController::class, 'create'])->name('customer.create');
+    Route::post('/customers', [CustomerController::class, 'store'])->name('customer.store');
+
     // Area Vendor (Kantin Master Data)
     Route::get('/vendor', [KantinController::class, 'masterVendor'])->name('vendor.index');
     Route::get('/menu', [KantinController::class, 'masterMenu'])->name('menu.index');
@@ -89,6 +95,8 @@ Route::get('/pesan-kantin', [KantinController::class, 'index'])->name('kantin.in
 Route::get('/get-menu/{idvendor}', [KantinController::class, 'getMenu'])->name('kantin.getMenu'); 
 Route::post('/checkout', [KantinController::class, 'checkout'])->name('kantin.checkout');
 Route::get('/pembayaran-customer', [KantinController::class, 'pembayaranCustomer'])->name('kantin.pembayaran');
+Route::get('/kantin/qr/{order_id}', [KantinController::class, 'qrCode'])->name('kantin.qr');
 
 // Midtrans Callback (Izin CSRF sudah diatur di bootstrap/app.php)
 Route::post('/midtrans-callback', [KantinController::class, 'callback'])->name('kantin.callback');
+Route::post('/', [KantinController::class, 'callback'])->name('kantin.callback.root');

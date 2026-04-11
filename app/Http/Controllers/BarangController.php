@@ -6,6 +6,7 @@ use App\Models\Barang;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Illuminate\Support\Facades\DB; // Tambahkan ini agar fungsi DB jalan
+use Picqer\Barcode\BarcodeGeneratorPNG;
 
 class BarangController extends Controller
 {
@@ -29,13 +30,18 @@ class BarangController extends Controller
         $startX = max(1, min(5, $startX));
         $startY = max(1, min(8, $startY));
 
-        $items = Barang::whereIn('id_barang', $selected)->get()->values()->all();
+        $items = Barang::whereIn('id_barang', $selected)->get()->map(function ($item) {
+            $generator = new BarcodeGeneratorPNG();
+            $barcode = base64_encode($generator->getBarcode($item->id_barang, $generator::TYPE_CODE_128));
+            $item->barcode = $barcode;
+            return $item;
+        });
 
         $slotsPerPage = 40; // 5 cols x 8 rows
-        $offset = ($startY - 1) * 5 + ($startX - 1); 
+        $offset = ($startY - 1) * 5 + ($startX - 1);
 
         $pages = [];
-        $remaining = $items;
+        $remaining = $items->values()->all();
 
         $first = true;
         while (count($remaining) > 0) {
@@ -156,14 +162,14 @@ class BarangController extends Controller
             // 1. Simpan ke tabel 'penjualan'
             // Menggunakan query builder agar kamu tidak perlu buat model baru jika belum ada
             $id_penjualan = DB::table('penjualan')->insertGetId([
-                'tanggal_transaksi' => now(),
-                'total_harga' => $request->total,
+                'timestamp' => now(),
+                'total' => $request->total,
             ]);
 
-            // 2. Simpan semua item belanja ke tabel 'detail_penjualan'
+            // 2. Simpan semua item belanja ke tabel 'penjualan_detail'
             foreach ($request->items as $item) {
-                DB::table('detail_penjualan')->insert([
-                    'id_penjualan' => $id_penjualan,
+                DB::table('penjualan_detail')->insert([
+                    'id_pen_jualan' => $id_penjualan,
                     'id_barang'    => $item['id_barang'],
                     'jumlah'       => $item['qty'],
                     'subtotal'     => $item['subtotal'],

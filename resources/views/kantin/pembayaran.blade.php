@@ -10,8 +10,19 @@
         </h3>
     </div>
 
-    <div class="row">
-        <div class="col-lg-12 grid-margin stretch-card">
+    <div class="row mb-3">
+        <div class="col-lg-12">
+            @if(isset($qrCode) && $latestPaid)
+            <div class="card mb-3">
+                <div class="card-body text-center">
+                    <h4 class="card-title mb-3">QR Code Pesanan Terakhir</h4>
+                    <div class="d-inline-block p-3 border rounded bg-light">
+                        <img src="{{ $qrCode }}" alt="QR Code ID Pesanan" style="max-width: 180px;" />
+                        <div class="mt-2">ID Pesanan: <strong>#{{ $latestPaid->idpesanan }}</strong></div>
+                    </div>
+                </div>
+            </div>
+            @endif
             <div class="card">
                 <div class="card-body">
                     <h4 class="card-title text-success">Riwayat Pembayaran (Terbaru)</h4>

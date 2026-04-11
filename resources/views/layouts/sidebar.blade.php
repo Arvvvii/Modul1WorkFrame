@@ -94,6 +94,13 @@
       </a>
     </li>
 
+    <li class="nav-item {{ Request::is('customers*') ? 'active' : '' }}">
+      <a class="nav-link" href="{{ route('customer.index') }}">
+        <span class="menu-title">Customers</span>
+        <i class="mdi mdi-account menu-icon"></i>
+      </a>
+    </li>
+
     <li class="nav-item {{ Request::is('wilayah*') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('wilayah.index') }}">
           <span class="menu-title">Wilayah Administrasi</span>

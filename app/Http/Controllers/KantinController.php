@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Midtrans\Snap;
 use Midtrans\Config;
+use Endroid\QrCode\Builder\Builder;
 
 class KantinController extends Controller
 {
@@ -99,7 +100,53 @@ class KantinController extends Controller
     public function pembayaranCustomer()
     {
         $transaksi = Pesanan::latest()->take(5)->get();
-        return view('kantin.pembayaran', compact('transaksi'));
+        $latestPaid = Pesanan::where('status_bayar', 1)->latest('idpesanan')->first();
+        $qrCode = null;
+
+        if ($latestPaid) {
+            $result = (new Builder())->build(
+                null,
+                null,
+                null,
+                (string) $latestPaid->idpesanan,
+                null,
+                null,
+                180,
+                10
+            );
+            $qrCode = $result->getDataUri();
+        }
+
+        return view('kantin.pembayaran', compact('transaksi', 'latestPaid', 'qrCode'));
+    }
+
+    public function qrCode($order_id)
+    {
+        // Format order_id: KANTIN-{idpesanan}-{timestamp}
+        $parts = explode('-', $order_id);
+        $id_asli = $parts[1] ?? null;
+        $pesanan = Pesanan::find($id_asli);
+
+        if (!$pesanan) {
+            return response()->json(['success' => false, 'message' => 'Pesanan tidak ditemukan.'], 404);
+        }
+
+        $result = (new Builder())->build(
+            null,
+            null,
+            null,
+            (string) $pesanan->idpesanan,
+            null,
+            null,
+            180,
+            10
+        );
+
+        return response()->json([
+            'success' => true,
+            'qr_code' => $result->getDataUri(),
+            'idpesanan' => $pesanan->idpesanan,
+        ]);
     }
 
     public function masterVendor() {

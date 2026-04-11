@@ -186,22 +186,27 @@ $(document).ready(function() {
         btn.prop('disabled', true).text('Proses...');
 
         // Hapus titik ribuan agar jadi angka murni sebelum dikirim ke DB
-        let totalAll = parseInt($('#label-total').text().replace(/\./g, ''));
-        
+        let totalAll = parseInt($('#label-total').text().replace(/\./g, '')) || 0;
+
         axios.post("{{ route('kasir.simpan') }}", {
             total: totalAll,
             items: keranjang
         })
         .then(res => {
-            if(res.data.success) {
-                Swal.fire('Berhasil!', 'Pembayaran disimpan.', 'success');
-                keranjang = []; 
-                renderTabel();
-                resetFormInput();
+            if (res.data && res.data.success) {
+                Swal.fire('Berhasil!', res.data.message || 'Pembayaran disimpan.', 'success')
+                    .then(() => {
+                        keranjang = [];
+                        renderTabel();
+                        resetFormInput();
+                    });
+            } else {
+                throw new Error((res.data && res.data.message) || 'Server tidak mengembalikan respons sukses.');
             }
         })
         .catch(err => {
-            Swal.fire('Error', 'Gagal menyimpan transaksi', 'error');
+            const message = err.response?.data?.message || err.message || 'Terjadi kesalahan saat menyimpan pembayaran.';
+            Swal.fire('Gagal', message, 'error');
         })
         .finally(() => {
             btn.prop('disabled', false).text('Bayar (Simpan)');

@@ -54,6 +54,56 @@ In order to ensure that the Laravel community is welcoming to all, please review
 
 If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
+## Modul 4 dan Modul 5
+
+Dokumentasi untuk tugas yang sudah diimplementasikan pada proyek ini:
+
+### Modul 4
+- `resources/views/barang/select_kota.blade.php`
+  - Implementasi input kota dan pilihan kota menggunakan select native dan Select2.
+  - Tambah kota baru melalui input text, lalu masukkan ke select.
+  - Menampilkan ringkasan kota terpilih.
+- `resources/views/barang/tugas_dom.blade.php`
+  - Manipulasi tabel DOM (update dan delete) tanpa reload.
+  - Baris tabel dapat diklik untuk membuka modal edit.
+  - Tombol `Update` mengganti nama dan harga di baris terpilih.
+  - Tombol `Hapus` menghapus baris tabel di browser.
+
+### Modul 5
+- `resources/views/barang/kasir.blade.php`
+  - Halaman Kasir (POS) untuk input barang, jumlah, dan daftar belanja.
+  - Logika keranjang di browser untuk tambah barang, edit qty, hapus item, dan hitung total.
+  - Tombol `Bayar (Simpan)` mengirim data pembayaran ke server via Axios.
+  - Hanya mereset keranjang ketika respons server sukses, untuk mencegah kehilangan data.
+- `resources/views/wilayah/index.blade.php`
+  - Implementasi chained dropdown wilayah administrasi.
+  - Provinsi -> kabupaten menggunakan jQuery AJAX.
+  - Kabupaten -> kecamatan dan kecamatan -> desa menggunakan Axios.
+  - Penanganan loading dan error untuk data dropdown.
+
+### Modul 7
+- `database/migrations/2026_04_11_120000_create_customers_table.php`
+  - Membuat tabel `customers` dengan kolom profil lengkap dan dua jenis penyimpanan foto: `foto_blob` (LONGBLOB) dan `foto_path` (VARCHAR).
+- `app/Models/Customer.php`
+  - Model customer dengan relasi ke `Province`, `Regency`, dan `District`.
+- `app/Http/Controllers/CustomerController.php`
+  - Index customer, form tambah customer, dan simpan data kamera.
+- `resources/views/customer/create.blade.php`
+  - Form tambah customer dengan field `Nama`, `Alamat`, `Provinsi`, `Kota`, `Kecamatan`, `Kodepos/Kelurahan`, dan tombol kamera.
+  - Modal Bootstrap untuk akses kamera dengan Webcam API dan snapshot.
+- `resources/views/customer/index.blade.php`
+  - Tabel customer menampilkan data profil lengkap dan preview foto.
+- `app/Http/Controllers/BarangController.php`
+  - Barcode ditambahkan ke PDF tag harga menggunakan library `picqer/php-barcode-generator`.
+- `resources/views/barang/pdf.blade.php`
+  - Barcode tampil di atas nomor `id_barang` pada tag harga.
+- `app/Http/Controllers/KantinController.php`
+  - QR Code `idpesanan` ditambahkan di halaman sukses pembayaran (`kantin.pembayaran`).
+- `resources/views/kantin/pembayaran.blade.php`
+  - Menampilkan QR Code dari `idpesanan` di bagian transaksi terakhir.
+
+> Catatan: semua perubahan hanya dilakukan pada fitur modul yang diminta tanpa merusak modul lain.
+
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).

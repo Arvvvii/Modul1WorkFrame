@@ -183,9 +183,36 @@ $(document).ready(function() {
         .then(res => {
             window.snap.pay(res.data.snap_token, {
                 onSuccess: function(result) {
-                    Swal.fire('Lunas!', 'Pembayaran Berhasil!', 'success').then(() => {
-                        window.location.href = "{{ route('kantin.pembayaran') }}";
-                    });
+                    let orderId = result.order_id || result.orderId || '';
+                    if (!orderId) {
+                        Swal.fire('Lunas!', 'Pembayaran Berhasil!', 'success').then(() => {
+                            window.location.href = "{{ route('kantin.pembayaran') }}";
+                        });
+                        return;
+                    }
+
+                    axios.get(`{{ url('kantin/qr') }}/${orderId}`)
+                        .then(function(response) {
+                            if (response.data.success) {
+                                Swal.fire({
+                                    title: 'Pembayaran Berhasil!',
+                                    html: `<div style="text-align:center; margin-bottom:10px;"><img src="${response.data.qr_code}" style="max-width:240px; width:100%;" /></div><div>ID Pesanan: <strong>#${response.data.idpesanan}</strong></div>`,
+                                    icon: 'success',
+                                    confirmButtonText: 'Lihat Riwayat',
+                                }).then(() => {
+                                    window.location.href = "{{ route('kantin.pembayaran') }}";
+                                });
+                            } else {
+                                Swal.fire('Lunas!', 'Pembayaran Berhasil!', 'success').then(() => {
+                                    window.location.href = "{{ route('kantin.pembayaran') }}";
+                                });
+                            }
+                        })
+                        .catch(function() {
+                            Swal.fire('Lunas!', 'Pembayaran Berhasil! (QR tidak tersedia)', 'success').then(() => {
+                                window.location.href = "{{ route('kantin.pembayaran') }}";
+                            });
+                        });
                 },
                 onPending: function(result) {
                     Swal.fire('Pending', 'Selesaikan pembayaran Anda', 'info').then(() => {

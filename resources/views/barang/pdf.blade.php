@@ -89,6 +89,12 @@
             width: 100%;
         }
 
+        .label-barcode img {
+            width: 100%;
+            max-height: 10mm;
+            margin-bottom: 2px;
+        }
+
         .label-price { 
             font-size: 8.5pt; 
             font-weight: bold; 
@@ -117,6 +123,9 @@
                                 <div class="label-cell">
                                     @if($item)
                                         <div class="label-content">
+                                            <div class="label-barcode">
+                                                <img src="data:image/png;base64,{{ $item->barcode }}" alt="Barcode {{ $item->id_barang }}">
+                                            </div>
                                             <div class="label-id">{{ $item->id_barang }}</div>
                                             <div class="label-name">{{ $item->nama }}</div>
                                             <div class="label-price">Rp {{ number_format($item->harga, 0, ',', '.') }}</div>
