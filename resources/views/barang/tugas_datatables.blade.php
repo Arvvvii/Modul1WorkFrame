@@ -1,8 +1,9 @@
 @extends('layouts.master')
 
 @push('style-page')
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css">
 <style>
-    #barangs-table tbody tr:hover { cursor: pointer !important; background-color: #f5f7fa !important; }
+    #tabel-barang tbody tr:hover { cursor: pointer !important; background-color: #f5f7fa !important; }
 </style>
 @endpush
 
@@ -10,11 +11,11 @@
 <div class="container-fluid">
     <div class="card shadow-sm">
         <div class="card-header bg-white">
-            <h4 class="mb-0">Tugas Modul: Manipulasi Tabel (U & D)</h4>
+            <h4 class="mb-0">Tugas Modul: Manipulasi Tabel DataTables (U & D)</h4>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered table-striped" id="barangs-table">
+                <table class="table table-bordered table-striped" id="tabel-barang">
                     <thead class="thead-light">
                         <tr>
                             <th width="40"><input type="checkbox"></th>
@@ -43,12 +44,11 @@
     </div>
 </div>
 
-{{-- Modal sesuai perintah modul --}}
 <div class="modal fade" id="modalBarang" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Edit/Hapus (DOM)</h5>
+                <h5 class="modal-title">Edit/Hapus (DataTables)</h5>
                 <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
             </div>
             <div class="modal-body">
@@ -84,20 +84,28 @@
 @endsection
 
 @push('js-page')
+<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
 <script>
 $(document).ready(function() {
-    // Klik Baris Muncul Modal
-    $(document).on('click', '#barangs-table tbody tr', function(e) {
+    var table = $('#tabel-barang').DataTable({
+        columnDefs: [
+            { orderable: false, targets: [0, 4] }
+        ]
+    });
+    var selectedRow = null;
+
+    $('#tabel-barang tbody').on('click', 'tr', function(e) {
         if ($(e.target).closest('button, input').length) return;
-        var row = $(this);
-        window.rowTerpilih = row;
-        $('#modal-id').val(row.find('td').eq(1).text().trim());
-        $('#modal-nama').val(row.find('td').eq(2).text().trim());
-        $('#modal-harga').val(row.find('td').eq(3).text().trim());
+        selectedRow = table.row(this);
+        let data = selectedRow.data();
+
+        // Urutan kolom: [checkbox, id_barang, nama, harga, aksi]
+        $('#modal-id').val(data[1]);
+        $('#modal-nama').val(data[2]);
+        $('#modal-harga').val(data[3]);
         $('#modalBarang').modal('show');
     });
 
-    // Update Tampilan (U)
     $('#btn-ubah-dom').on('click', function() {
         var form = document.getElementById('modal-barang-form');
         if (!form.reportValidity()) {
@@ -115,17 +123,17 @@ $(document).ready(function() {
         text.text('Sedang memproses...');
 
         setTimeout(function() {
-            $(window.rowTerpilih).find('td').eq(2).text(nama);
-            $(window.rowTerpilih).find('td').eq(3).text(harga);
+            if (selectedRow) {
+                var rowData = selectedRow.data();
+                selectedRow.data([rowData[0], rowData[1], nama, harga, rowData[4]]).draw(false);
+            }
             $('#modalBarang').modal('hide');
-
             spinner.addClass('d-none');
             button.prop('disabled', false);
             text.text('Update (U)');
         }, 1000);
     });
 
-    // Hapus Tampilan (D)
     $('#btn-hapus-dom').on('click', function() {
         if (!confirm('Hapus dari baris?')) {
             return;
@@ -140,9 +148,10 @@ $(document).ready(function() {
         text.text('Sedang menghapus...');
 
         setTimeout(function() {
-            $(window.rowTerpilih).remove();
+            if (selectedRow) {
+                selectedRow.remove().draw(false);
+            }
             $('#modalBarang').modal('hide');
-
             spinner.addClass('d-none');
             button.prop('disabled', false);
             text.text('Hapus (D)');

@@ -3,44 +3,43 @@
 <head>
     <meta charset="utf-8">
     <style>
-        @page { 
-            size: A4 portrait; 
-            /* Margin fisik hasil penggaris temanmu: Atas 0.4, Kanan 0.3, Bawah 0.3, Kiri 0.5 */
-            margin: 0.4cm 0.3cm 0.3cm 0.5cm; 
+        @page {
+            size: 210mm 297mm;
+            margin: 0;
         }
 
-        body { 
-            font-family: Arial, Helvetica, sans-serif; 
-            margin: 0; 
+        html,
+        body {
+            margin: 0;
             padding: 0;
-            /* Pastikan lebar dan tinggi body sesuai standar A4 agar tidak memotong halaman */
             width: 210mm;
-            position: relative;
+            height: 297mm;
+            font-family: Arial, Helvetica, sans-serif;
         }
 
         .page {
             position: relative;
             width: 210mm;
-            height: 297mm; /* Tinggi standar A4 */
+            height: 297mm;
             overflow: hidden;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
 
-        .labels-table { 
-            /* Paksa posisi di titik nol margin @page sesuai saran temanmu */
+        .labels-table {
             position: absolute;
             top: 0;
             left: 0;
-            border-collapse: separate; 
-            /* HORIZONTAL 0.2cm (untuk cegah kanan kepotong), VERTIKAL 0.2cm */
-            border-spacing: 0.2cm 0.2cm; 
+            border-collapse: separate;
+            border-spacing: 0.2cm 0.2cm;
             table-layout: fixed;
             width: auto;
         }
         
-        .labels-table td { 
+        .labels-table td {
             padding: 0;
             margin: 0;
-            vertical-align: middle; 
+            vertical-align: middle;
         }
 
         /* UKURAN FISIK STIKER TnJ 108: 38mm x 18mm */
@@ -49,6 +48,10 @@
             height: 18mm;
             box-sizing: border-box;
             overflow: hidden;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            page-break-after: avoid;
+            break-after: avoid;
             /* Border merah untuk panduan mata (Hapus baris ini setelah mantap) */
         }
 

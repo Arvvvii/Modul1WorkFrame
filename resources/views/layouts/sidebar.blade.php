@@ -94,11 +94,25 @@
       </a>
     </li>
 
-    <li class="nav-item {{ Request::is('customers*') ? 'active' : '' }}">
-      <a class="nav-link" href="{{ route('customer.index') }}">
-        <span class="menu-title">Customers</span>
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="collapse" href="#customer-dropdown" aria-expanded="{{ Request::is('customers*') ? 'true' : 'false' }}" aria-controls="customer-dropdown">
+        <span class="menu-title">Customer</span>
+        <i class="menu-arrow"></i>
         <i class="mdi mdi-account menu-icon"></i>
       </a>
+      <div class="collapse {{ Request::is('customers*') ? 'show' : '' }}" id="customer-dropdown">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item">
+            <a class="nav-link {{ Request::is('customers') ? 'active' : '' }}" href="{{ route('customer.index') }}">Data Customer</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {{ Request::is('customers/create/blob') ? 'active' : '' }}" href="{{ route('customer.create.blob') }}">Tambah Customer 1</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {{ Request::is('customers/create/file') ? 'active' : '' }}" href="{{ route('customer.create.file') }}">Tambah Customer 2</a>
+          </li>
+        </ul>
+      </div>
     </li>
 
     <li class="nav-item {{ Request::is('wilayah*') ? 'active' : '' }}">
@@ -114,10 +128,13 @@
         <i class="menu-arrow"></i>
         <i class="mdi mdi-jsfiddle menu-icon"></i>
       </a>
-      <div class="collapse {{ Request::is('barang-dom') || Request::is('select-kota') ? 'show' : '' }}" id="tugas-modul-dropdown">
+      <div class="collapse {{ Request::is('barang-dom') || Request::is('barang-datatables') || Request::is('select-kota') ? 'show' : '' }}" id="tugas-modul-dropdown">
         <ul class="nav flex-column sub-menu">
           <li class="nav-item"> 
             <a class="nav-link {{ Request::is('barang-dom') ? 'active' : '' }}" href="/barang-dom">Manipulasi Tabel</a> 
+          </li>
+          <li class="nav-item"> 
+            <a class="nav-link {{ Request::is('barang-datatables') ? 'active' : '' }}" href="/barang-datatables">Manipulasi Tabel DataTables</a> 
           </li>
           <li class="nav-item"> 
             <a class="nav-link {{ Request::is('select-kota') ? 'active' : '' }}" href="/select-kota">Select Kota</a> 

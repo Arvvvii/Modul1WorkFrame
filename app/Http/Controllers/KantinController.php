@@ -36,42 +36,99 @@ class KantinController extends Controller
         return response()->json($menus);
     }
 
-    public function checkout(Request $request) {
-        return DB::transaction(function () use ($request) {
-            $pesanan = Pesanan::create([
-                'nama' => $request->nama,
-                'total' => $request->total,
-                'status_bayar' => 0,
-            ]);
-
-            foreach ($request->items as $item) {
-                DetailPesanan::create([
-                    'idpesanan' => $pesanan->idpesanan,
-                    'idmenu' => $item['idmenu'],
-                    'jumlah' => $item['qty'],
-                    'harga' => $item['harga'],
-                    'subtotal' => $item['subtotal'],
+    public function checkout(Request $request)
+    {
+        try {
+            return DB::transaction(function () use ($request) {
+                $pesanan = Pesanan::create([
+                    'nama' => $request->nama,
+                    'total' => $request->total,
+                    'status_bayar' => 0,
                 ]);
-            }
 
-            // ORDER ID unik untuk Midtrans
-            $order_id = 'KANTIN-' . $pesanan->idpesanan . '-' . time();
+                $rawItems = $request->items ?? [];
+                if (is_object($rawItems)) {
+                    $rawItems = (array) $rawItems;
+                }
 
-            $params = [
-                'transaction_details' => [
-                    'order_id' => $order_id,
-                    'gross_amount' => (int)$request->total,
-                ],
-                'customer_details' => [
-                    'first_name' => $request->nama,
-                ],
-            ]; 
+                \Log::info('Checkout items payload', ['items' => $rawItems]);
 
-            $snapToken = Snap::getSnapToken($params);
-            $pesanan->update(['snap_token' => $snapToken]);
+                $normalizedItems = [];
+                foreach ($rawItems as $key => $item) {
+                    if (is_object($item)) {
+                        $item = (array) $item;
+                    }
 
-            return response()->json(['snap_token' => $snapToken]);
-        });
+                    if (!is_array($item)) {
+                        \Log::warning('Checkout item invalid type', ['key' => $key, 'item' => $item]);
+                        continue;
+                    }
+
+                    if (!isset($item['idmenu']) && is_numeric($key)) {
+                        $item['idmenu'] = $key;
+                    }
+
+                    $normalizedItems[] = $item;
+                }
+
+                \Log::info('Checkout items normalized payload', ['items' => $normalizedItems]);
+
+                foreach ($normalizedItems as $item) {
+                    $idmenu = $item['idmenu'] ?? null;
+                    $qty = isset($item['qty']) ? (int) $item['qty'] : null;
+                    $harga = isset($item['harga']) ? (int) $item['harga'] : null;
+                    $subtotal = isset($item['subtotal']) ? (int) $item['subtotal'] : null;
+
+                    if (!$idmenu || $qty <= 0 || $harga === null || $subtotal === null) {
+                        \Log::warning('Checkout item skipped due missing required fields or invalid values', [
+                            'item' => $item,
+                            'idmenu' => $idmenu,
+                            'qty' => $qty,
+                            'harga' => $harga,
+                            'subtotal' => $subtotal,
+                        ]);
+                        continue;
+                    }
+
+                    DetailPesanan::create([
+                        'idpesanan' => $pesanan->idpesanan,
+                        'idmenu' => $idmenu,
+                        'jumlah' => $qty,
+                        'harga' => $harga,
+                        'subtotal' => $subtotal,
+                    ]);
+                }
+
+                // ORDER ID unik untuk Midtrans
+                $order_id = 'KANTIN-' . $pesanan->idpesanan . '-' . time();
+
+                $params = [
+                    'transaction_details' => [
+                        'order_id' => $order_id,
+                        'gross_amount' => (int)$request->total,
+                    ],
+                    'customer_details' => [
+                        'first_name' => $request->nama,
+                    ],
+                ]; 
+
+                // Override cURL certificate path untuk Laragon di D: dan hindari referensi C:\laragon
+                Config::$curlOptions = [
+                    CURLOPT_CAINFO => "D:\\laragon\\etc\\ssl\\cacert.pem",
+                    CURLOPT_HTTPHEADER => [],
+                ];
+
+                $snapToken = Snap::getSnapToken($params);
+                $pesanan->update(['snap_token' => $snapToken]);
+
+                return response()->json(['snap_token' => $snapToken]);
+            });
+        } catch (\Exception $e) {
+            \Log::error('Midtrans checkout failed: ' . $e->getMessage(), ['exception' => $e]);
+            return response()->json([
+                'message' => 'Checkout gagal: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function callback(Request $request)

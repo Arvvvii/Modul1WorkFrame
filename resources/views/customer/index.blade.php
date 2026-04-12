@@ -9,9 +9,19 @@
             </span> Data Customer
         </h3>
         <nav aria-label="breadcrumb">
-            <a href="{{ route('customer.create') }}" class="btn btn-gradient-primary btn-icon-text">
-                <i class="mdi mdi-plus btn-icon-prepend"></i> Tambah Customer 
-            </a>
+            <div class="dropdown">
+                <button class="btn btn-gradient-primary dropdown-toggle" type="button" id="dropdownTambahCustomer" data-bs-toggle="dropdown" aria-expanded="false">
+                    Opsi Tambah
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownTambahCustomer">
+                    <li>
+                        <a class="dropdown-item" href="{{ route('customer.create.blob') }}">Tambah via BLOB</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ route('customer.create.file') }}">Tambah via File Path</a>
+                    </li>
+                </ul>
+            </div>
         </nav>
     </div>
 
@@ -40,7 +50,9 @@
                                 @forelse($customers as $customer)
                                 <tr>
                                     <td class="py-1">
-                                        @if($customer->foto_path)
+                                        @if($customer->foto_blob)
+                                            <img src="{{ $customer->foto_blob_base64 }}" alt="image" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;"/>
+                                        @elseif($customer->foto_path)
                                             <img src="{{ asset('storage/' . $customer->foto_path) }}" alt="image" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;"/>
                                         @else
                                             <div class="badge badge-secondary">No Image</div>

@@ -172,13 +172,29 @@ $(document).ready(function() {
         const btn = $(this);
         btn.prop('disabled', true).text('Processing...');
 
+        const normalizedItems = Array.isArray(keranjang)
+            ? keranjang
+            : Object.entries(keranjang).map(([key, value]) => {
+                if (value && typeof value === 'object') {
+                    return {
+                        idmenu: value.idmenu ?? value.id ?? key,
+                        qty: value.qty ?? value.quantity ?? 0,
+                        harga: value.harga ?? value.price ?? 0,
+                        subtotal: value.subtotal ?? (value.qty * value.harga) ?? 0,
+                        nama: value.nama ?? value.name ?? '',
+                    };
+                }
+                return value;
+            });
+
         let data = {
             nama: $('#nama_customer').val(),
             total: totalHargaGlobal,
-            items: keranjang,
+            items: normalizedItems,
             _token: "{{ csrf_token() }}"
         };
 
+        console.log('Checkout payload', data);
         axios.post("{{ route('kantin.checkout') }}", data)
         .then(res => {
             window.snap.pay(res.data.snap_token, {
@@ -230,7 +246,8 @@ $(document).ready(function() {
         })
         .catch(err => {
             console.error(err);
-            Swal.fire('Error', 'Terjadi kesalahan server', 'error');
+            const message = err.response?.data?.message || err.message || 'Terjadi kesalahan server';
+            Swal.fire('Error', message, 'error');
             btn.prop('disabled', false).text('Bayar & Checkout');
         });
     });

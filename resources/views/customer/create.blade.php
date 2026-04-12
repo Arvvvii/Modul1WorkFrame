@@ -7,8 +7,9 @@
             <span class="page-title-icon bg-gradient-primary text-white me-2">
                 <i class="mdi mdi-account-plus"></i>
             </span>
-            Tambah Customer
+            {{ $pageTitle ?? 'Tambah Customer' }}
         </h3>
+        <p class="text-muted">{{ $subtitle ?? 'Ambil foto menggunakan Webcam.js dan kirim data base64 ke server.' }}</p>
     </div>
 
     @if(session('success'))
@@ -33,7 +34,7 @@
         <div class="col-12 grid-margin stretch-card">
             <div class="card">
                 <div class="card-body">
-                    <form class="forms-sample" action="{{ route('customer.store') }}" method="POST">
+                    <form class="forms-sample" action="{{ $storeRoute }}" method="POST">
                         @csrf
 
                         <div class="form-group">
@@ -98,7 +99,7 @@
                             </div>
                         </div>
 
-                        <input type="hidden" name="foto_blob_data" id="foto_blob_data" value="{{ old('foto_blob_data') }}">
+                        <input type="hidden" name="{{ $inputName }}" id="foto_data" value="{{ old($inputName) }}">
 
                         <div class="mt-4">
                             <button type="submit" class="btn btn-gradient-primary me-2">Simpan Data</button>
@@ -123,16 +124,14 @@
                 <div class="row text-center">
                     <div class="col-md-6 mb-3">
                         <p class="fw-bold mb-2">Video Realtime</p>
-                        <div class="border rounded bg-dark d-flex align-items-center justify-content-center" style="height: 250px; overflow: hidden;">
-                            <video id="video" autoplay playsinline style="width: 100%; height: 100%; object-fit: cover; display: none;"></video>
-                            <div id="video-placeholder" class="text-white small">Kamera Belum Aktif</div>
+                        <div class="border rounded bg-dark" style="height: 250px; overflow: hidden;">
+                            <div id="cameraElement" class="mx-auto" style="width: 100%; height: 250px;"></div>
                         </div>
                     </div>
                     <div class="col-md-6 mb-3">
                         <p class="fw-bold mb-2">Hasil Snapshot</p>
                         <div class="border rounded bg-white d-flex align-items-center justify-content-center" style="height: 250px; overflow: hidden;">
                             <img id="snapshot" src="" alt="Snapshot" style="width: 100%; height: 100%; object-fit: cover; display: none;" />
-                            <canvas id="canvas" class="d-none"></canvas>
                             <div id="snapshot-placeholder" class="text-muted small">Klik Ambil Foto</div>
                         </div>
                     </div>
@@ -149,68 +148,66 @@
 @endsection
 
 @push('js-page')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.26/webcam.min.js"></script>
 <script>
-    let cameraStream = null;
-    const oldPhotoData = @json(old('foto_blob_data'));
+    let capturedDataUrl = null;
+    const oldPhotoData = @json(old($inputName));
     const oldRegency = @json(old('regency_id'));
     const oldDistrict = @json(old('district_id'));
 
-    function resetCameraView() {
-        document.getElementById('video').style.display = 'none';
-        document.getElementById('video-placeholder').style.display = 'block';
-        document.getElementById('snapshot').style.display = 'none';
-        document.getElementById('snapshot-placeholder').style.display = 'block';
-        document.getElementById('btn-capture').disabled = true;
-        document.getElementById('btn-save-photo').disabled = true;
-    }
-
     function showPreviewPhoto(dataUrl) {
         if (!dataUrl) return;
-        document.getElementById('foto_blob_data').value = dataUrl;
+        capturedDataUrl = dataUrl;
+        document.getElementById('foto_data').value = dataUrl;
         document.getElementById('preview-photo').src = dataUrl;
         document.getElementById('preview-photo').style.display = 'block';
         document.getElementById('preview-hint').style.display = 'none';
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        if (oldPhotoData) showPreviewPhoto(oldPhotoData);
-
-        document.getElementById('btn-start-camera').addEventListener('click', function() {
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(function(stream) {
-                    cameraStream = stream;
-                    const video = document.getElementById('video');
-                    video.srcObject = stream;
-                    video.style.display = 'block';
-                    document.getElementById('video-placeholder').style.display = 'none';
-                    document.getElementById('btn-capture').disabled = false;
-                })
-                .catch(function() {
-                    alert('Kamera tidak tersedia atau izin ditolak.');
-                });
+    function startWebcam() {
+        Webcam.set({
+            width: 640,
+            height: 480,
+            image_format: 'png',
+            png_quality: 90,
+            constraints: {
+                facingMode: 'user'
+            }
         });
+        Webcam.attach('#cameraElement');
+        document.getElementById('btn-capture').disabled = false;
+    }
 
-        document.getElementById('btn-capture').addEventListener('click', function() {
-            const video = document.getElementById('video');
-            const canvas = document.getElementById('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            const dataUrl = canvas.toDataURL('image/png');
-            document.getElementById('snapshot').src = dataUrl;
+    function captureSnapshot() {
+        Webcam.snap(function(dataUri) {
+            document.getElementById('snapshot').src = dataUri;
             document.getElementById('snapshot').style.display = 'block';
             document.getElementById('snapshot-placeholder').style.display = 'none';
             document.getElementById('btn-save-photo').disabled = false;
+            capturedDataUrl = dataUri;
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (oldPhotoData) {
+            showPreviewPhoto(oldPhotoData);
+        }
+
+        document.getElementById('btn-start-camera').addEventListener('click', function() {
+            startWebcam();
+        });
+
+        document.getElementById('btn-capture').addEventListener('click', function() {
+            captureSnapshot();
         });
 
         document.getElementById('btn-save-photo').addEventListener('click', function() {
-            const canvas = document.getElementById('canvas');
-            showPreviewPhoto(canvas.toDataURL('image/png'));
-            bootstrap.Modal.getInstance(document.getElementById('cameraModal')).hide();
+            if (capturedDataUrl) {
+                showPreviewPhoto(capturedDataUrl);
+                bootstrap.Modal.getInstance(document.getElementById('cameraModal')).hide();
+            }
         });
 
-        // Handle wilayah AJAX
         $('#province').on('change', function() {
             let id = $(this).val();
             $('#regency').empty().append('<option value="">Pilih Kota / Kabupaten</option>').prop('disabled', true);
@@ -218,6 +215,7 @@
             if(id) {
                 $.get("{{ url('wilayah/regencies') }}/" + id, function(data) {
                     $('#regency').prop('disabled', false);
+                    $('#regency').empty().append('<option value="">Pilih Kota / Kabupaten</option>');
                     data.forEach(d => $('#regency').append(`<option value="${d.id}">${d.name}</option>`));
                 });
             }
@@ -229,6 +227,7 @@
             if(id) {
                 $.get("{{ url('wilayah/districts') }}/" + id, function(data) {
                     $('#district').prop('disabled', false);
+                    $('#district').empty().append('<option value="">Pilih Kecamatan</option>');
                     data.forEach(d => $('#district').append(`<option value="${d.id}">${d.name}</option>`));
                 });
             }

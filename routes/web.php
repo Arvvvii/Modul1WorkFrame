@@ -52,6 +52,11 @@ Route::middleware('auth')->group(function () {
         return view('barang.tugas_dom', compact('barangs'));
     })->name('barang.dom');
 
+    Route::get('/barang-datatables', function () {
+        $barangs = \App\Models\Barang::all(); 
+        return view('barang.tugas_datatables', compact('barangs'));
+    })->name('barang.datatables');
+
     Route::get('/select-kota', function () {
         return view('barang.select_kota');
     })->name('select.kota');
@@ -70,6 +75,10 @@ Route::middleware('auth')->group(function () {
     // Customer Modul 7
     Route::get('/customers', [CustomerController::class, 'index'])->name('customer.index');
     Route::get('/customers/create', [CustomerController::class, 'create'])->name('customer.create');
+    Route::get('/customers/create/blob', [CustomerController::class, 'createBlob'])->name('customer.create.blob');
+    Route::get('/customers/create/file', [CustomerController::class, 'createFile'])->name('customer.create.file');
+    Route::post('/customers/blob', [CustomerController::class, 'storeBlob'])->name('customer.store.blob');
+    Route::post('/customers/file', [CustomerController::class, 'storeFile'])->name('customer.store.file');
     Route::post('/customers', [CustomerController::class, 'store'])->name('customer.store');
 
     // Area Vendor (Kantin Master Data)

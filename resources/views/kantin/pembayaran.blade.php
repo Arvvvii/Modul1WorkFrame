@@ -52,7 +52,7 @@
                                             <label class="badge badge-warning px-3">PENDING</label>
                                         @endif
                                     </td>
-                                    <td class="text-center">{{ $t->timestamp }}</td>
+                                    <td class="text-center">{{ $t->created_at ?? '-' }}</td>
                                 </tr>
                                 @empty
                                 <tr>
