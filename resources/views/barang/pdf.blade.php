@@ -28,10 +28,10 @@
 
         .labels-table {
             position: absolute;
-            top: 0;
+            top: 3mm;
             left: 0;
             border-collapse: separate;
-            border-spacing: 0.2cm 0.2cm;
+            border-spacing: 3mm 2mm;
             table-layout: fixed;
             width: auto;
         }
@@ -72,7 +72,7 @@
         }
 
         .label-id { 
-            font-size: 6pt; 
+            font-size: 5pt; 
             color: #555; 
             margin-bottom: 1px;
             line-height: 1;
@@ -80,7 +80,7 @@
 
         .label-name { 
             font-weight: 700; 
-            font-size: 8pt; 
+            font-size: 7pt; 
             line-height: 1.1; 
             color: #000;
             margin: 1px 0;
@@ -93,13 +93,14 @@
         }
 
         .label-barcode img {
-            width: 100%;
-            max-height: 10mm;
-            margin-bottom: 2px;
+            width: 75%;
+            max-height: 6mm;
+            display: block;
+            margin: 0 auto 1px;
         }
 
         .label-price { 
-            font-size: 8.5pt; 
+            font-size: 7.5pt; 
             font-weight: bold; 
             margin-top: 1px;
             line-height: 1;

@@ -87,11 +87,22 @@
       </a>
     </li>
 
-    <li class="nav-item {{ Request::is('kasir*') ? 'active' : '' }}">
-      <a class="nav-link" href="{{ route('kasir.index') }}">
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="collapse" href="#kasir-dropdown" aria-expanded="{{ Request::is('kasir*') ? 'true' : 'false' }}" aria-controls="kasir-dropdown">
         <span class="menu-title">Kasir (POS)</span>
+        <i class="menu-arrow"></i>
         <i class="mdi mdi-cash-register menu-icon"></i>
       </a>
+      <div class="collapse {{ Request::is('kasir*') ? 'show' : '' }}" id="kasir-dropdown">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item">
+            <a class="nav-link {{ Request::is('kasir') ? 'active' : '' }}" href="{{ route('kasir.index') }}">Axios</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {{ Request::is('kasir-ajax') ? 'active' : '' }}" href="{{ route('kasir.ajax') }}">Ajax</a>
+          </li>
+        </ul>
+      </div>
     </li>
 
     <li class="nav-item">

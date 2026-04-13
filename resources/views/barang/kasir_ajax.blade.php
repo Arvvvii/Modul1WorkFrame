@@ -2,18 +2,11 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="page-header d-flex align-items-center justify-content-between">
-        <div>
-            <h3 class="page-title">
-                <span class="page-title-icon bg-gradient-primary text-white me-2">
-                    <i class="mdi mdi-cash-register"></i>
-                </span> Kasir (POS)
-            </h3>
-            <p class="text-muted mb-0">Versi Axios. Jika ingin versi Ajax, buka halaman Kasir Ajax.</p>
-        </div>
-        <div>
-            <a href="{{ route('kasir.ajax') }}" class="btn btn-outline-primary btn-sm">Buka Kasir Ajax</a>
-        </div>
+    <div class="page-header">
+        <h3 class="page-title">
+            <span class="page-title-icon bg-gradient-primary text-white me-2">
+                <i class="mdi mdi-cash-register"></i>
+            </span> Kasir (POS) - Versi Ajax</h3>
     </div>
 
     <div class="row">
@@ -58,8 +51,7 @@
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                </tbody>
+                            <tbody></tbody>
                         </table>
                     </div>
                     <hr>
@@ -75,73 +67,72 @@
 @endsection
 
 @push('js-page')
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
 let keranjang = [];
 
 $(document).ready(function() {
-    // 0. SETUP CSRF TOKEN
-    axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-    let token = document.head.querySelector('meta[name="csrf-token"]');
-    if (token) {
-        axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
-    }
+    $.ajaxSetup({
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
 
     function validasiTombol() {
         let nama = $('#nama_barang').val();
         let qty = parseInt($('#jumlah_input').val());
-        if (nama !== "" && qty > 0) {
-            $('#btn-tambahkan').prop('disabled', false);
-        } else {
-            $('#btn-tambahkan').prop('disabled', true);
-        }
+        $('#btn-tambahkan').prop('disabled', !(nama !== '' && qty > 0));
     }
 
-    $('#jumlah_input').on('input change', function() {
-        validasiTombol();
-    });
+    $('#jumlah_input').on('input change', validasiTombol);
 
-    // 1. CARI BARANG
     $('#id_barang_input').on('keypress', function(e) {
-        if(e.which == 13) { 
-            let id = $(this).val();
-            if(!id) return;
-            axios.get("{{ url('kasir/cari') }}/" + id)
-                .then(res => {
-                    if(res.data.success) {
-                        let b = res.data.data;
-                        $('#nama_barang').val(b.nama);
-                        $('#harga_barang').val(b.harga);
-                        validasiTombol();
-                    } else {
-                        Swal.fire('Error', 'Barang tidak ditemukan!', 'error');
-                        resetFormInput();
-                    }
-                });
-        }
+        if (e.which !== 13) return;
+        e.preventDefault();
+
+        let id = $(this).val().trim();
+        if (!id) return;
+
+        $.ajax({
+            url: "{{ url('kasir/cari') }}/" + id,
+            method: 'GET',
+            dataType: 'json',
+            success: function(res) {
+                if (res.success) {
+                    $('#nama_barang').val(res.data.nama);
+                    $('#harga_barang').val(res.data.harga);
+                    validasiTombol();
+                } else {
+                    Swal.fire('Error', 'Barang tidak ditemukan!', 'error');
+                    resetFormInput();
+                }
+            },
+            error: function() {
+                Swal.fire('Error', 'Gagal terhubung ke server.', 'error');
+                resetFormInput();
+            }
+        });
     });
 
-    // 2. TAMBAHKAN KE TABEL
     $('#btn-tambahkan').on('click', function() {
-        let id_barang = $('#id_barang_input').val();
-        let nama = $('#nama_barang').val();
-        let harga = parseInt($('#harga_barang').val());
-        let qty = parseInt($('#jumlah_input').val());
+        let id_barang = $('#id_barang_input').val().trim();
+        let nama = $('#nama_barang').val().trim();
+        let harga = parseInt($('#harga_barang').val()) || 0;
+        let qty = parseInt($('#jumlah_input').val()) || 1;
 
         let index = keranjang.findIndex(x => x.id_barang === id_barang);
-        if(index !== -1) {
+        if (index !== -1) {
             keranjang[index].qty += qty;
             keranjang[index].subtotal = keranjang[index].qty * keranjang[index].harga;
         } else {
             keranjang.push({ id_barang, nama, harga, qty, subtotal: harga * qty });
         }
+
         renderTabel();
         resetFormInput();
     });
 
-    // 3. RENDER TABEL
     function renderTabel() {
         let html = '';
         let total = 0;
@@ -161,11 +152,10 @@ $(document).ready(function() {
         $('#btn-bayar').prop('disabled', keranjang.length === 0);
     }
 
-    // 4. EDIT & HAPUS
     $(document).on('change', '.edit-qty', function() {
         let i = $(this).data('index');
         let newQty = parseInt($(this).val());
-        if(newQty > 0) {
+        if (newQty > 0) {
             keranjang[i].qty = newQty;
             keranjang[i].subtotal = newQty * keranjang[i].harga;
             renderTabel();
@@ -186,36 +176,39 @@ $(document).ready(function() {
         $('#btn-tambahkan').prop('disabled', true);
     }
 
-    // 5. SIMPAN (DIPERBAIKI)
     $('#btn-bayar').on('click', function() {
         let btn = $(this);
         btn.prop('disabled', true).text('Proses...');
 
-        // Hapus titik ribuan agar jadi angka murni sebelum dikirim ke DB
         let totalAll = parseInt($('#label-total').text().replace(/\./g, '')) || 0;
 
-        axios.post("{{ route('kasir.simpan') }}", {
-            total: totalAll,
-            items: keranjang
-        })
-        .then(res => {
-            if (res.data && res.data.success) {
-                Swal.fire('Berhasil!', res.data.message || 'Pembayaran disimpan.', 'success')
-                    .then(() => {
+        $.ajax({
+            url: "{{ route('kasir.simpan') }}",
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ total: totalAll, items: keranjang }),
+            dataType: 'json',
+            success: function(res) {
+                if (res.success) {
+                    Swal.fire('Berhasil!', 'Pembayaran disimpan.', 'success').then(() => {
                         keranjang = [];
                         renderTabel();
                         resetFormInput();
                     });
-            } else {
-                throw new Error((res.data && res.data.message) || 'Server tidak mengembalikan respons sukses.');
+                } else {
+                    Swal.fire('Gagal', res.message || 'Gagal menyimpan pembayaran.', 'error');
+                }
+            },
+            error: function(xhr) {
+                let message = 'Terjadi kesalahan saat menyimpan pembayaran.';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    message = xhr.responseJSON.message;
+                }
+                Swal.fire('Gagal', message, 'error');
+            },
+            complete: function() {
+                btn.prop('disabled', keranjang.length === 0).text('Bayar (Simpan)');
             }
-        })
-        .catch(err => {
-            const message = err.response?.data?.message || err.message || 'Terjadi kesalahan saat menyimpan pembayaran.';
-            Swal.fire('Gagal', message, 'error');
-        })
-        .finally(() => {
-            btn.prop('disabled', false).text('Bayar (Simpan)');
         });
     });
 });

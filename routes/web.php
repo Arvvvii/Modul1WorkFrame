@@ -69,6 +69,7 @@ Route::middleware('auth')->group(function () {
 
     // Fitur Kasir / POS
     Route::get('/kasir', [BarangController::class, 'kasir'])->name('kasir.index');
+    Route::get('/kasir-ajax', [BarangController::class, 'kasirAjax'])->name('kasir.ajax');
     Route::get('/kasir/cari/{kode}', [BarangController::class, 'cariBarang'])->name('kasir.cari');
     Route::post('/kasir/simpan', [BarangController::class, 'simpanTransaksi'])->name('kasir.simpan');
 

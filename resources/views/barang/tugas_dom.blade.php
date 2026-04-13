@@ -8,9 +8,30 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="card shadow-sm">
+    <div class="card shadow-sm mb-4">
         <div class="card-header bg-white">
             <h4 class="mb-0">Tugas Modul: Manipulasi Tabel (U & D)</h4>
+        </div>
+        <div class="card-body">
+            <form id="form-tambah-barang" class="row g-3">
+                <div class="col-md-6">
+                    <label for="input-nama" class="form-label">Nama Barang</label>
+                    <input type="text" class="form-control" id="input-nama" placeholder="Masukkan nama barang" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="input-harga" class="form-label">Harga Barang</label>
+                    <input type="text" class="form-control" id="input-harga" placeholder="Masukkan harga" required>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white">
+            <h4 class="mb-0">Tabel Barang</h4>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -147,6 +168,30 @@ $(document).ready(function() {
             button.prop('disabled', false);
             text.text('Hapus (D)');
         }, 1000);
+    });
+
+    $('#form-tambah-barang').on('submit', function(e) {
+        e.preventDefault();
+        var form = this;
+        if (!form.reportValidity()) {
+            return;
+        }
+
+        var nama = $('#input-nama').val().trim();
+        var harga = $('#input-harga').val().trim();
+        var idBarang = Math.floor(10000000 + Math.random() * 90000000);
+
+        $('#barangs-table tbody').append(`
+            <tr>
+                <td><input type="checkbox"></td>
+                <td>${idBarang}</td>
+                <td>${nama}</td>
+                <td>${harga}</td>
+                <td><button type="button" class="btn btn-sm btn-danger btn-delete-row">Hapus</button></td>
+            </tr>
+        `);
+
+        form.reset();
     });
 });
 </script>

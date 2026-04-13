@@ -124,8 +124,14 @@ class BarangController extends Controller
 
     public function kasir()
     {
-        // Menampilkan halaman kasir
+        // Menampilkan halaman kasir versi Axios
         return view('barang.kasir');
+    }
+
+    public function kasirAjax()
+    {
+        // Menampilkan halaman kasir versi Ajax JQuery
+        return view('barang.kasir_ajax');
     }
 
     public function cariBarang($id)
