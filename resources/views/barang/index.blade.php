@@ -38,7 +38,7 @@
                         <tbody>
                             @foreach($barangs as $barang)
                             <tr>
-                                <td><input type="checkbox" name="selected_ids[]" value="{{ $barang->id_barang }}"></td>
+                                <td><input type="checkbox" name="selected_ids[]" class="item-checkbox" value="{{ $barang->id_barang }}"></td>
                                 <td>{{ $barang->id_barang }}</td>
                                 <td>{{ $barang->nama }}</td>
                                 <td>{{ number_format($barang->harga, 0, ',', '.') }}</td>
@@ -58,12 +58,31 @@
 
 @endsection
 
+@push('js-page')
+<script>
+    $(document).ready(function() {
+        // Event delegation untuk #select-all (Bisa berjalan walau elemen dimuat dinamis)
+        $(document).on('change', '#select-all', function() {
+            console.log('Select all clicked', this.checked);
+            $('.item-checkbox').prop('checked', this.checked);
+        });
+
+        // Event delegation untuk .item-checkbox
+        $(document).on('change', '.item-checkbox', function() {
+            // Jika ada yang tidak dicentang, matikan centang select-all
+            if ($('.item-checkbox:not(:checked)').length > 0) {
+                $('#select-all').prop('checked', false);
+            } else {
+                // Jika semuanya dicentang, nyalakan centang select-all
+                $('#select-all').prop('checked', true);
+            }
+        });
+    });
+</script>
+@endpush
+
 @section('scripts')
 <script>
-    document.getElementById('select-all').addEventListener('change', function(e){
-        const checked = e.target.checked;
-        document.querySelectorAll('input[name="selected_ids[]"]').forEach(cb => cb.checked = checked);
-    });
 
     // Optional: initialize datatables if present
     if (window.jQuery && $.fn.dataTable) {

@@ -50,7 +50,7 @@
         <i class="menu-arrow"></i>
         <i class="mdi mdi-store menu-icon"></i>
       </a>
-      <div class="collapse {{ Request::is('menu*') || Request::is('vendor*') || Request::is('transaksi*') ? 'show' : '' }}" id="vendor-dropdown">
+      <div class="collapse {{ Request::is('menu*') || Request::is('vendor*') || Request::is('transaksi*') || Request::is('admin/scan-kantin*') ? 'show' : '' }}" id="vendor-dropdown">
         <ul class="nav flex-column sub-menu">
           <li class="nav-item"> 
             <a class="nav-link {{ Request::is('menu*') ? 'active' : '' }}" href="{{ route('menu.index') }}">Master Menu</a> 
@@ -61,10 +61,27 @@
           <li class="nav-item"> 
             <a class="nav-link {{ Request::is('transaksi*') ? 'active' : '' }}" href="{{ route('vendor.transaksi') }}">Data Transaksi</a> 
           </li>
+          <li class="nav-item"> 
+            <a class="nav-link {{ Request::is('admin/scan-kantin*') ? 'active' : '' }}" href="{{ route('admin.scan_kantin') }}">Scan QR Kantin</a> 
+          </li>
         </ul>
       </div>
     </li>
     @endauth
+
+    <li class="nav-item {{ Request::is('toko*') ? 'active' : '' }}">
+      <a class="nav-link" href="{{ route('toko.index') }}">
+        <span class="menu-title">Data Toko</span>
+        <i class="mdi mdi-store menu-icon"></i>
+      </a>
+    </li>
+
+    <li class="nav-item {{ Request::is('kunjungan*') ? 'active' : '' }}">
+      <a class="nav-link" href="{{ route('kunjungan.index') }}">
+        <span class="menu-title">Kunjungan Toko</span>
+        <i class="mdi mdi-map-marker-radius menu-icon"></i>
+      </a>
+    </li>
 
     <li class="nav-item {{ Request::is('kategori*') ? 'active' : '' }}">
       <a class="nav-link" href="{{ route('kategori.index') }}">
@@ -84,6 +101,13 @@
       <a class="nav-link" href="{{ route('barang.index') }}">
         <span class="menu-title">Barang (CRUD)</span>
         <i class="mdi mdi-tag menu-icon"></i>
+      </a>
+    </li>
+
+    <li class="nav-item {{ Request::is('barang/scanner') ? 'active' : '' }}">
+      <a class="nav-link" href="{{ route('barang.scan') }}">
+        <span class="menu-title">Scanner Barang</span>
+        <i class="mdi mdi-barcode-scan menu-icon"></i>
       </a>
     </li>
 

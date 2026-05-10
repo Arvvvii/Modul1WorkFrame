@@ -18,8 +18,8 @@ class KantinController extends Controller
     {
         Config::$serverKey = config('midtrans.server_key');
         Config::$isProduction = config('midtrans.is_production');
-        Config::$isSanitized = config('midtrans.is_sanitized');
-        Config::$is3ds = config('midtrans.is_3ds');
+        Config::$isSanitized = true;
+        Config::$is3ds = true;
     }
 
     public function index() {
@@ -44,6 +44,8 @@ class KantinController extends Controller
                     'nama' => $request->nama,
                     'total' => $request->total,
                     'status_bayar' => 0,
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ]);
 
                 $rawItems = $request->items ?? [];
@@ -119,6 +121,12 @@ class KantinController extends Controller
                 ];
 
                 $snapToken = Snap::getSnapToken($params);
+                
+                if (!$snapToken) {
+                    \Log::error('Gagal mendapatkan Snap Token', ['params' => $params]);
+                    throw new \Exception("Snap Token gagal digenerate oleh Midtrans.");
+                }
+
                 $pesanan->update(['snap_token' => $snapToken]);
 
                 return response()->json(['snap_token' => $snapToken]);
@@ -219,5 +227,58 @@ class KantinController extends Controller
     public function transaksiLunas() {
         $transaksi = Pesanan::where('status_bayar', 1)->latest('idpesanan')->get(); 
         return view('vendor.transaksi', compact('transaksi'));
+    }
+
+    public function invoice($idpesanan)
+    {
+        $pesanan = Pesanan::with('detail_pesanan.menu')->find($idpesanan);
+        if (!$pesanan) {
+            return redirect()->route('kantin.index')->with('error', 'Pesanan tidak ditemukan');
+        }
+
+        session()->put('pesanan_saya', $idpesanan);
+
+        $result = (new Builder())->build(
+            null,
+            null,
+            null,
+            (string) $pesanan->idpesanan,
+            null,
+            null,
+            180,
+            10
+        );
+        $qrCode = $result->getDataUri();
+
+        return view('kantin.invoice', compact('pesanan', 'qrCode'));
+    }
+
+    public function pesananSaya()
+    {
+        $idpesanan = session()->get('pesanan_saya');
+        if ($idpesanan) {
+            return redirect()->route('kantin.invoice', $idpesanan);
+        }
+        return redirect()->route('kantin.index')->with('info', 'Anda belum memiliki pesanan aktif.');
+    }
+
+    public function scanKantin()
+    {
+        return view('admin.scan_kantin');
+    }
+
+    public function getPesananData($id)
+    {
+        $pesanan = Pesanan::with('detail_pesanan.menu')->find($id);
+        if ($pesanan) {
+            return response()->json([
+                'success' => true,
+                'data' => $pesanan
+            ]);
+        }
+        return response()->json([
+            'success' => false,
+            'message' => 'Pesanan tidak ditemukan'
+        ], 404);
     }
 }

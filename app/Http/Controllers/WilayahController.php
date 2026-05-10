@@ -15,7 +15,7 @@ class WilayahController extends Controller {
 
     public function getRegencies($province_id) {
         // Relasi: reg_regencies.province_id -> reg_provinces.id
-        $data = Regency::where('province_id', $province_id)->orderBy('name', 'asc')->get();
+        $data = Regency::where('province_id', $province_id)->orderBy('name', 'asc')->get(); // Mengambil data kabupaten/kota berdasarkan provinsi_id
         return response()->json($data);
     }
 
@@ -25,7 +25,7 @@ class WilayahController extends Controller {
         return response()->json($data);
     }
 
-    public function getVillages($district_id) {
+    public function getVillages($district_id) { 
         // Relasi: reg_villages.district_id -> reg_districts.id
         $data = Village::where('district_id', $district_id)->orderBy('name', 'asc')->get();
         return response()->json($data);

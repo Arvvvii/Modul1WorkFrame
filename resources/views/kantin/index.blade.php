@@ -214,9 +214,9 @@ $(document).ready(function() {
                                     title: 'Pembayaran Berhasil!',
                                     html: `<div style="text-align:center; margin-bottom:10px;"><img src="${response.data.qr_code}" style="max-width:240px; width:100%;" /></div><div>ID Pesanan: <strong>#${response.data.idpesanan}</strong></div>`,
                                     icon: 'success',
-                                    confirmButtonText: 'Lihat Riwayat',
+                                    confirmButtonText: 'Lihat Struk Pesanan',
                                 }).then(() => {
-                                    window.location.href = "{{ route('kantin.pembayaran') }}";
+                                    window.location.href = `{{ url('kantin/invoice') }}/${response.data.idpesanan}`;
                                 });
                             } else {
                                 Swal.fire('Lunas!', 'Pembayaran Berhasil!', 'success').then(() => {

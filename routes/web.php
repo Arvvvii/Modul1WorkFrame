@@ -35,10 +35,17 @@ Route::middleware('auth')->group(function () {
         return view('dashboard');
     })->name('home');
 
-    // Resource CRUD (Kategori, Buku, Barang)
+    // Resource CRUD (Kategori, Buku, Barang, Toko)
     Route::resource('kategori', KategoriController::class);
     Route::resource('buku', BukuController::class);
+    Route::get('/barang/scanner', [BarangController::class, 'scan'])->name('barang.scan');
     Route::resource('barang', BarangController::class);
+    Route::get('/toko/{toko}/cetak', [\App\Http\Controllers\TokoController::class, 'cetakBarcode'])->name('toko.cetak_barcode');
+    Route::resource('toko', \App\Http\Controllers\TokoController::class);
+    
+    // Vendor Kunjungan Scanner
+    Route::get('/kunjungan', [\App\Http\Controllers\KunjunganController::class, 'index'])->name('kunjungan.index');
+    Route::post('/kunjungan/store', [\App\Http\Controllers\KunjunganController::class, 'store'])->name('kunjungan.store');
     
     // Fitur Cetak Label & PDF
     Route::post('/barang/cetak', [BarangController::class, 'cetak'])->name('barang.cetak');
@@ -86,6 +93,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/vendor', [KantinController::class, 'masterVendor'])->name('vendor.index');
     Route::get('/menu', [KantinController::class, 'masterMenu'])->name('menu.index');
     Route::get('/transaksi-lunas', [KantinController::class, 'transaksiLunas'])->name('vendor.transaksi');
+    
+    // Scanner Admin Vendor Modul 7
+    Route::get('/admin/scan-kantin', [KantinController::class, 'scanKantin'])->name('admin.scan_kantin');
+    Route::get('/api/pesanan/{id}', [KantinController::class, 'getPesananData'])->name('api.pesanan');
 
 }); 
 
@@ -106,6 +117,8 @@ Route::get('/get-menu/{idvendor}', [KantinController::class, 'getMenu'])->name('
 Route::post('/checkout', [KantinController::class, 'checkout'])->name('kantin.checkout');
 Route::get('/pembayaran-customer', [KantinController::class, 'pembayaranCustomer'])->name('kantin.pembayaran');
 Route::get('/kantin/qr/{order_id}', [KantinController::class, 'qrCode'])->name('kantin.qr');
+Route::get('/kantin/invoice/{idpesanan}', [KantinController::class, 'invoice'])->name('kantin.invoice');
+Route::get('/pesanan-saya', [KantinController::class, 'pesananSaya'])->name('kantin.pesananSaya');
 
 // Midtrans Callback (Izin CSRF sudah diatur di bootstrap/app.php)
 Route::post('/midtrans-callback', [KantinController::class, 'callback'])->name('kantin.callback');

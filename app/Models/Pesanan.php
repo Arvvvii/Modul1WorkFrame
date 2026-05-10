@@ -14,6 +14,13 @@ class Pesanan extends Model
         'total', 
         'metode_bayar', 
         'status_bayar', 
-        'snap_token'
+        'snap_token',
+        'created_at',
+        'updated_at',
     ];
+
+    public function detail_pesanan()
+    {
+        return $this->hasMany(DetailPesanan::class, 'idpesanan', 'idpesanan');
+    }
 }

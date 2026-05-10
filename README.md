@@ -1,8 +1,56 @@
 # Dokumentasi Aplikasi Laravel
 
 > Proyek ini adalah kumpulan tugas Modul 1–7, dengan fokus teknis pada arsitektur Blade, keamanan Google OAuth + OTP, database, DOM/JQuery, AJAX/Axios, dan integrasi Midtrans/Barcode/QR.
+>
+> Fitur terbaru yang sudah disesuaikan:
+> - Halaman wilayah administrasi sekarang menampilkan 2 tabel terpisah: versi AJAX dan versi Axios.
+> - Halaman Modul 4 `tugas_dom` dan `tugas_datatables` dilengkapi input form di atas tabel untuk menambahkan data.
+> - Kasir POS sekarang memiliki dua halaman terpisah: satu versi Ajax dan satu versi Axios.
+> - Cetak label TnJ 108 sudah disesuaikan di template PDF `resources/views/barang/pdf.blade.php`.
 
 ---
+
+## 11. Konsep Dasar & Mekanisme Kerja (Cheat Sheet UTS)
+
+### A. Mekanisme Selector & Query
+**1. Penggunaan `$(this)`:**
+`$(this)` merepresentasikan elemen HTML tempat di mana suatu *event* (kejadian) sedang berlangsung. Sangat berguna agar kita tidak perlu mencari ulang elemen dengan ID/Class.
+*Contoh:* Saat memilih baris tabel (`<tr>`) di modul jQuery DOM, kita menggunakan `$(this)` untuk mengambil isi kolom yang ada di dalam *baris yang diklik tersebut saja*:
+```js
+$('#tabel-barang tbody').on('click', 'tr', function(e) {
+    let namaBarang = $(this).find('td').eq(2).text(); // Ambil nama barang hanya dari baris (tr) INI
+});
+```
+
+**2. Perulangan `forEach` (Axios) atau `$.each` (jQuery):**
+Di modul Wilayah Administrasi, kita memakai perulangan untuk mengambil array berisi ratusan data wilayah dari server, lalu memecahnya satu per satu menjadi elemen `<option>` di dalam *dropdown* HTML.
+```js
+// Contoh dengan Axios (berbasis Promise)
+axios.get('/wilayah/districts/' + idKabupaten).then(res => {
+    res.data.forEach(item => {
+        $('#kecamatan').append(`<option value="${item.id}">${item.name}</option>`);
+    });
+});
+```
+
+### B. Cara Membuktikan Kode ke Dosen melalui Browser (Inspect Element)
+Jika dosen bertanya, *"Bagaimana kamu tahu kode ini benar-benar jalan tanpa reload?"* Buka Developer Tools (F12 / Klik Kanan -> Inspect) dan lakukan hal berikut:
+
+**1. Tab Network (Pembuktian AJAX & Axios):**
+- **Fungsi:** Membuktikan pertukaran data "di balik layar" tanpa *refresh* halaman.
+- **Cara Demo:** Pilih filter **Fetch/XHR**. Coba ganti pilihan dropdown Provinsi. Akan muncul *request* baru di tabel Network. Klik baris tersebut dan buka tab **Response**. Tunjukkan bahwa server membalas dengan **data JSON murni**, bukan struktur HTML seluruh halaman.
+
+**2. Tab Console (Log Sukses & Error):**
+- **Fungsi:** Melihat *output* debug dari developer atau peringatan *error*.
+- **Cara Demo:** Saat mendemonstrasikan proses Midtrans (Modul 6), tekan tombol Bayar dan tunjukkan di tab Console bahwa `snap_token` sukses dikirim kembali oleh server. Jika terjadi gagal *fetch*, tulisan merah (*error*) akan muncul di sini.
+
+**3. Tab Elements (Pembuktian Manipulasi DOM Real-time):**
+- **Fungsi:** Membuktikan bahwa HTML berubah seketika karena JavaScript/jQuery.
+- **Cara Demo:** Arahkan Inspect Element ke baris tabel (DOM). Coba tekan edit dan ubah datanya. Tunjukkan bahwa tag HTML (`<td>`) di dalam layar Elements **berkedip ungu** dan teksnya langsung berubah. Tunjukkan juga saat memanggil AJAX, attribute seperti `disabled` dan class *spinner* bisa dimanipulasi secara real-time.
+
+### C. Realitas Teknologi (Mengapa Kombinasi Ini Dipilih?)
+- **jQuery:** Dipilih murni karena memberikan **kemudahan luar biasa dalam memanipulasi DOM** (HTML). Mencari elemen, merubah teks, menambah class, dan menangani *event click* jauh lebih hemat baris kode dibanding JavaScript murni (`Vanilla JS`).
+- **Axios:** Dipilih untuk *request API* karena sifatnya yang modern (berbasis *Promise*), *syntax* yang ringkas, dan kemampuannya yang **otomatis mem-parsing data response menjadi JSON**.
 
 ## 1. Arsitektur Proyek (Modul 1 & 2)
 
@@ -114,6 +162,29 @@ SET NEW.id_barang = CONCAT('BRG-', DATE_FORMAT(NOW(), '%Y%m%d'), LPAD((SELECT CO
 ```
 
 Namun di repo ini, format unik digenerate melalui `uniqid()` agar setiap item langsung mempunyai ID saat disimpan.
+
+### 2.1.1 Lokasi `trigger` dipakai
+
+- Secara teknis implementasi `trigger_id_barang` tidak berada di database, tetapi di kode PHP.
+- File utama yang memuat logika ini adalah `app/Http/Controllers/BarangController.php` pada method yang menyimpan barang baru.
+- Di sana `id_barang` dibuat dengan `uniqid()` sebelum data disimpan, sehingga efeknya mirip dengan trigger auto-generate ID.
+- Jika ingin diterapkan sebagai trigger DB nyata, konsepnya akan dipindahkan ke `CREATE TRIGGER` pada tabel barang.
+
+### 2.1.2 Lokasi `selector` dipakai
+
+- Selector digunakan luas di file Blade dan JavaScript untuk memilih elemen form, tabel, modal, dan komponen AJAX/Axios.
+- Contoh file yang memakai selector:
+  - `resources/views/barang/tugas_dom.blade.php`
+  - `resources/views/barang/tugas_datatables.blade.php`
+  - `resources/views/wilayah/index.blade.php`
+  - `resources/views/barang/kasir.blade.php`
+  - `resources/views/customer/create.blade.php`
+- Selector umum di proyek ini termasuk:
+  - `#tabel-barang`, `#barangs-table`, `#modalBarang`
+  - `#provinsi`, `#kabupaten`, `#kecamatan`, `#desa`
+  - `#id_barang_input`, `#nama_barang`, `#harga_barang`
+  - `$('.select2')`, `$('#select-kota-1')`, `$('#select-kota-2')`
+- Di JavaScript, selector dipakai bersama event handler seperti `$('#provinsi').on('change', ...)` dan `$('#tabel-barang tbody').on('click', 'tr', ...)`.
 
 ### 2.2 Algoritma penempatan label TnJ 108 berdasarkan koordinat (X, Y)
 
@@ -252,6 +323,116 @@ Pada versi DataTables, baris dipilih melalui API DataTables dan data kolom diamb
 
 ```js
 var table = $('#tabel-barang').DataTable();
+```
+
+---
+
+## 4. Catatan Istilah Front-End dan Penggunaannya di Proyek Ini
+
+### 4.1 HTML
+- HTML adalah bahasa markup untuk membuat struktur halaman web.
+- Di proyek ini HTML digunakan untuk membuat form, tabel, modal, dan seluruh tampilan Blade.
+- Contoh: `<table id="tabel-barang">`, `<button id="btn-ubah-dom">`, `<input name="nama">`.
+- HTML adalah dasar, sedangkan JS/jQuery digunakan untuk menambahkan perilaku setelah halaman dimuat.
+
+### 4.2 DOM (Document Object Model)
+- DOM adalah representasi struktur HTML di browser sebagai pohon objek.
+- JavaScript dan jQuery berinteraksi dengan DOM untuk membaca dan mengubah konten halaman tanpa reload.
+- Contoh penggunaan di projek ini:
+  - memilih elemen: `document.getElementById('modal-barang-form')`
+  - mengubah teks: `$(row).find('td').eq(2).text(nama)`
+  - membuka modal: `$('#modalBarang').modal('show')`
+- DOM dipakai saat perlu memanipulasi tampilan langsung, seperti meng-update baris tabel atau menampilkan data di modal.
+
+### 4.3 jQuery
+- jQuery adalah pustaka JavaScript yang memudahkan pemilihan elemen, event handling, dan animasi.
+- Proyek ini menggunakan jQuery untuk:
+  - memilih elemen dengan selector seperti `$('#id')`, `$('.class')`, dan `$('tbody tr')`
+  - menangani klik: `$('#btn-ubah-dom').on('click', function() { ... })`
+  - mengubah isi elemen: `.text()`, `.html()`, `.val()`
+  - merangkai DOM traversal: `.closest()`, `.find()`, `.parents()`
+- jQuery sering dipakai di halaman form DOM dan di contoh AJAX/Axios untuk menyiapkan data dan menangani respons.
+
+### 4.4 Selectors
+- Selector adalah cara memilih elemen HTML yang akan diubah atau diambil datanya.
+- Contoh di proyek:
+  - ID selector: `$('#modal-id')`
+  - class selector: `$('.btn-save')`
+  - tag selector: `$('tbody tr')`
+  - descendant selector: `$('#barangs-table tbody tr')`
+  - attribute selector: `$('input[name="nama"]')`
+- Selector dengan jQuery membuat operasi DOM lebih ringkas dan konsisten.
+
+### 4.5 DataTables
+- DataTables adalah plugin jQuery yang membuat tabel HTML menjadi interaktif.
+- Fitur DataTables di proyek ini meliputi:
+  - pagination
+  - kolom sortable
+  - pencarian built-in
+  - API untuk memilih baris dan memperbarui data
+- Gunakan DataTables jika tabel lebih besar atau butuh fitur table modern.
+- Contoh inisialisasi:
+
+```js
+var table = $('#tabel-barang').DataTable({
+    responsive: true,
+    processing: true,
+});
+```
+
+### 4.6 AJAX
+- AJAX adalah teknik untuk meminta data dari server tanpa reload halaman.
+- Proyek menggunakan AJAX di halaman `wilayah`, `kasir`, dan beberapa fitur CRUD.
+- Dengan AJAX, data dikirim ke Laravel route dan respons JSON diterima untuk memperbarui tampilan.
+- Contoh penggunaan:
+
+```js
+$.ajax({
+    url: '/api/barang',
+    method: 'POST',
+    data: formData,
+    success: function(response) {
+        // update tabel atau modal
+    }
+});
+```
+
+### 4.7 Axios
+- Axios adalah pustaka JavaScript lain untuk melakukan request HTTP, mirip AJAX tetapi dengan syntax lebih modern.
+- Proyek ini menggunakan Axios pada halaman kasir/axios dan halaman wilayah versi Axios.
+- Keunggulan Axios:
+  - mendukung promise (`.then()` / `async-await`)
+  - menangani JSON secara otomatis
+  - lebih mudah membaca error respons
+- Contoh penggunaan:
+
+```js
+axios.post('/api/pesanan', {
+    barang_id: id,
+    qty: qty
+})
+.then(function(response) {
+    // sukses
+})
+.catch(function(error) {
+    // error
+});
+```
+
+### 4.8 Kapan pakai masing-masing di proyek ini
+- HTML selalu dipakai sebagai struktur halaman utama di semua view Blade.
+- DOM dipakai untuk manipulasi langsung elemen setelah halaman dimuat.
+- jQuery dipakai untuk event handler, manipulasi DOM, dan operasi seleksi elemen di banyak modul.
+- DataTables dipakai untuk tabel yang memerlukan paging, sorting, dan search.
+- AJAX dipakai di fitur yang butuh kirim/terima data tanpa reload halaman.
+- Axios dipakai di versi alternatif halaman yang ingin menggunakan style request modern dan promise.
+- `dqan` biasanya merujuk pada kombinasi DataTables + jQuery + AJAX, yaitu tabel interaktif yang mengambil atau mengirim data secara dinamis.
+
+### 4.9 Catatan tambahan
+- Jika ingin mengubah tampilan atau nilai input, utamakan selector yang spesifik seperti `#id` untuk menghindari konflik.
+- Untuk tabel DataTables, pilih elemen melalui API DataTables jika ingin konsisten dengan plugin.
+- Gunakan `event.preventDefault()` ketika tombol berada di dalam form tetapi tidak ingin submit default terjadi.
+
 
 $('#tabel-barang tbody').on('click', 'tr', function(e) {
     if ($(e.target).closest('button, input').length) return;
@@ -673,6 +854,67 @@ Customer::create([... 'foto_blob' => null, 'foto_path' => $filename]);
 - `resources/views/customer/create.blade.php` → chained select dan webcam capture.
 - `app/Http/Controllers/KantinController.php` → Midtrans + QR Code.
 - `resources/views/barang/pdf.blade.php` → tata letak label TnJ 108.
+
+---
+
+## 10. Panduan Teknis & Debugging UTS (Untuk Dosen)
+
+### 1. Pemahaman Selector & Query (Jawaban untuk Dosen)
+
+**Perbedaan Selector ID, Class, dan Element:**
+- **ID (`#`)**: Digunakan untuk menargetkan tepat **satu** elemen yang unik di seluruh halaman. Contoh: `$('#modal-nama')`.
+- **Class (`.`)**: Digunakan untuk menargetkan **banyak** elemen sekaligus yang berbagi class yang sama. Contoh: `$('.item-checkbox')`.
+- **Element (`tag`)**: Digunakan untuk menargetkan semua elemen HTML dengan tag tersebut. Contoh: `$('tr')` atau `$('button')`.
+
+**Contoh Penggunaan Selector (Satu vs Banyak):**
+- **Mengambil value (satu elemen):**
+  ```js
+  // Mengambil ID barang dari input yang user ketik
+  let idBarang = $('#id_barang_input').val();
+  ```
+- **Mengubah banyak elemen sekaligus:**
+  ```js
+  // Mencentang semua checkbox item saat "Select All" diklik
+  $('.item-checkbox').prop('checked', true);
+  ```
+
+**Logic Perulangan (Each):**
+Pada fitur form select berjenjang (Provinsi hingga Desa), kita mengubah data balikan server (berupa array of object JSON) menjadi elemen `<option>` di dropdown HTML menggunakan fungsi *each* atau *forEach*.
+
+Contoh kode di file `wilayah/index.blade.php`:
+```js
+// Menggunakan forEach (dari data response Axios)
+res.data.forEach(item => { 
+    $('#kecamatan').append(`<option value="${item.id}">${item.name}</option>`); 
+});
+```
+*Fungsi kode di atas:* Iterasi setiap item wilayah yang didapat dari database, lalu menyisipkannya satu per satu ke dalam dropdown `<select id="kecamatan">`.
+
+### 2. Panduan Inspect Browser (Langkah Demo)
+
+Saat mendemonstrasikan aplikasi kepada Dosen, gunakan **Developer Tools** (Klik kanan > Inspect / tekan F12) pada browser Chrome/Edge:
+
+- **Tab Elements (Pengecekan DOM):**
+  Arahkan kursor *inspect* ke tabel atau dropdown. Tunjukkan kepada dosen bahwa elemen HTML tersebut memiliki atribut `id="..."` atau `class="..."` yang sama persis dengan yang kita tulis di dalam kode jQuery. Ini membuktikan bahwa selector jQuery kita benar-benar "mengait" ke elemen yang tepat.
+
+- **Tab Console (Debugging & Log):**
+  Gunakan tab ini untuk melihat apakah ada *error script* (teks merah) yang menghalangi eksekusi kode. Anda juga bisa membuktikan aksi user terekam dengan `console.log`.
+  *Contoh:* Saat menekan checkbox "Select All", tunjukkan log di console yang bertuliskan: `Select all clicked true`.
+
+- **Tab Network (PENTING - Pembuktian AJAX/Axios):**
+  Untuk membuktikan API berjalan dinamis tanpa *reload*:
+  1. Buka tab **Network**, pilih filter **Fetch/XHR**.
+  2. Lakukan aksi di UI (contoh: Pilih Provinsi "Jawa Barat").
+  3. Perhatikan akan muncul baris request baru (misal: `/wilayah/regencies/32`).
+  4. Klik baris tersebut, buka sub-tab **Response**.
+  5. Tunjukkan bahwa server mengembalikan data murni berformat JSON (kumpulan kabupaten), bukan HTML utuh.
+
+### 3. Pembuktian Payment Gateway (Modul 6)
+
+Untuk mendemonstrasikan bahwa sistem Midtrans terhubung dengan lancar:
+1. Lakukan pemesanan di halaman Kantin hingga menekan tombol **Bayar**.
+2. **Lihat di Tab Console:** Tunjukkan respons `snap_token` berhasil di-*generate* (misal: `snap_token: "d6f...-..."`).
+3. **Lihat di Tab Network:** Perlihatkan adanya *API Call* keluar aplikasi kita menuju server Midtrans (domain `app.sandbox.midtrans.com`). Ini membuktikan aplikasi kita sukses berinteraksi dengan API pihak ketiga.
 
 ---
 

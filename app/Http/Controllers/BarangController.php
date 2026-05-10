@@ -153,6 +153,11 @@ class BarangController extends Controller
         }
     }
 
+    public function scan()
+    {
+        return view('barang.scan');
+    }
+
     public function simpanTransaksi(Request $request)
     {
         // Validasi input dari frontend
